@@ -19,7 +19,12 @@ export default function Dashboard() {
     }, []);
 
     if (loading) {
-        return <div className="page-loading"><div className="spinner"></div><p>Loading dashboard...</p></div>;
+        return (
+            <div className="page-loading">
+                <div className="spinner"></div>
+                <p>Loading dashboard...</p>
+            </div>
+        );
     }
 
     const statCards = [
@@ -32,16 +37,27 @@ export default function Dashboard() {
     ];
 
     return (
-        <div className="dashboard-page fade-in">
+        <div className="dashboard-page fade-in" style={{ paddingBottom: "40px" }}>
+
+            {/* HEADER */}
             <div className="page-header">
-                <h2>Dashboard</h2>
-                <p className="text-muted">Overview of your task management</p>
+                <h2>Dashboard Overview</h2>
+                <p className="text-muted">
+                    Welcome back — here’s what’s happening with your workspace today.
+                </p>
             </div>
 
+            {/* STAT CARDS */}
             <div className="stats-grid">
                 {statCards.map((card) => (
                     <div key={card.label} className="stat-card glass">
-                        <div className="stat-icon" style={{ backgroundColor: `${card.color}20`, color: card.color }}>
+                        <div
+                            className="stat-icon"
+                            style={{
+                                backgroundColor: `${card.color}20`,
+                                color: card.color
+                            }}
+                        >
                             <card.icon size={22} />
                         </div>
                         <div className="stat-info">
@@ -52,50 +68,116 @@ export default function Dashboard() {
                 ))}
             </div>
 
+            {/* QUICK INSIGHTS */}
+            <div className="chart-card glass" style={{ marginTop: "20px" }}>
+                <h3>Quick Insights</h3>
+
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+                        gap: "15px",
+                        marginTop: "15px"
+                    }}
+                >
+                    <div className="glass" style={{ padding: "15px" }}>
+                        <h4>Total Productivity</h4>
+                        <p className="text-muted">
+                            {stats?.totalTasks
+                                ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
+                                : 0}
+                            % tasks completed
+                        </p>
+                    </div>
+
+                    <div className="glass" style={{ padding: "15px" }}>
+                        <h4>Pending Work</h4>
+                        <p className="text-muted">
+                            {stats?.inProgressTasks || 0} tasks currently active
+                        </p>
+                    </div>
+
+                    <div className="glass" style={{ padding: "15px" }}>
+                        <h4>Overdue Alert</h4>
+                        <p className="text-muted">
+                            {stats?.overdueTasks || 0} tasks need attention
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* CHARTS */}
             <div className="dashboard-charts">
+
+                {/* STATUS */}
                 <div className="chart-card glass">
                     <h3>Tasks by Status</h3>
                     <div className="chart-bars">
                         {stats?.tasksByStatus?.map((item) => (
                             <div key={item.status} className="chart-bar-row">
-                                <span className="chart-bar-label">{item.status?.replace('_', ' ')}</span>
+                                <span className="chart-bar-label">
+                                    {item.status?.replace('_', ' ')}
+                                </span>
+
                                 <div className="chart-bar-track">
-                                    <div className="chart-bar-fill" style={{
-                                        width: `${stats.totalTasks ? (item.count / stats.totalTasks) * 100 : 0}%`,
-                                        backgroundColor: '#3B82F6'
-                                    }}></div>
+                                    <div
+                                        className="chart-bar-fill"
+                                        style={{
+                                            width: `${stats.totalTasks
+                                                    ? (item.count / stats.totalTasks) * 100
+                                                    : 0
+                                                }%`,
+                                            backgroundColor: '#3B82F6'
+                                        }}
+                                    ></div>
                                 </div>
+
                                 <span className="chart-bar-value">{item.count}</span>
                             </div>
                         ))}
+
                         {(!stats?.tasksByStatus || stats.tasksByStatus.length === 0) && (
-                            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>No tasks yet</p>
+                            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>
+                                No tasks yet
+                            </p>
                         )}
                     </div>
                 </div>
 
+                {/* PRIORITY */}
                 <div className="chart-card glass">
                     <h3>Tasks by Priority</h3>
                     <div className="chart-bars">
                         {stats?.tasksByPriority?.map((item) => (
                             <div key={item.priority} className="chart-bar-row">
                                 <span className="chart-bar-label">{item.priority}</span>
+
                                 <div className="chart-bar-track">
-                                    <div className="chart-bar-fill" style={{
-                                        width: `${stats.totalTasks ? (item.count / stats.totalTasks) * 100 : 0}%`,
-                                        backgroundColor: '#F59E0B'
-                                    }}></div>
+                                    <div
+                                        className="chart-bar-fill"
+                                        style={{
+                                            width: `${stats.totalTasks
+                                                    ? (item.count / stats.totalTasks) * 100
+                                                    : 0
+                                                }%`,
+                                            backgroundColor: '#F59E0B'
+                                        }}
+                                    ></div>
                                 </div>
+
                                 <span className="chart-bar-value">{item.count}</span>
                             </div>
                         ))}
+
                         {(!stats?.tasksByPriority || stats.tasksByPriority.length === 0) && (
-                            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>No tasks yet</p>
+                            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>
+                                No tasks yet
+                            </p>
                         )}
                     </div>
                 </div>
+
             </div>
         </div>
     );
-};
-
+}

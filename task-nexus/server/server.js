@@ -1,3 +1,5 @@
+console.log("🔥 CORRECT SERVER FILE RUNNING");
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -245,21 +247,38 @@ app.delete('/api/projects/:id', (req, res) => {
         res.json({ message: 'Project purged' });
     });
 });
-
 app.get('/api/tasks', (req, res) => {
     const { projectId } = req.query;
-    let query = 'SELECT t.*, u.username as assignee_name FROM tasks t LEFT JOIN users u ON t.assignee_id = u.id';
+
+    let query = `
+    SELECT t.*, u.username as assignee_name,
+
+    CASE 
+     WHEN t.due_date IS NOT NULL 
+     AND t.due_date < NOW() 
+     AND t.status != 'done'
+     THEN 1 ELSE 0 
+    END AS is_overdue
+
+    FROM tasks t 
+    LEFT JOIN users u ON t.assignee_id = u.id
+    `;
 
     if (projectId) {
         query += " WHERE t.project_id = " + projectId;
     }
 
-    query += ' ORDER BY t.created_at DESC';
+    query += " ORDER BY t.due_date ASC";
 
     fluxNexusHandler.query(query, (err, results) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).send("task fetch error");
+        }
         res.json(results);
     });
 });
+
 
 app.post('/api/tasks', (req, res) => {
     const { title, description, status, priority, due_date, project_id } = req.body;
@@ -377,8 +396,75 @@ app.get('/api/analytics/dashboard', (req, res) => {
         }
     );
 });
+// =====================================================
+// INVITE USER TO WORKSPACE API
+// =====================================================
+app.post("/api/workspaces/invite", (req, res) => {
+  const { workspace_id, email } = req.body;
 
+  if (!workspace_id || !email) {
+    return res.status(400).json({ message: "Missing data" });
+  }
+
+  // 🔎 find user by email
+  fluxNexusHandler.query(
+    "SELECT id FROM users WHERE email=?",
+    [email],
+    (err, user) => {
+      if (err) {
+        console.log("USER SEARCH ERROR:", err);
+        return res.status(500).json({ message: "DB error" });
+      }
+
+      if (user.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userId = user[0].id;
+
+      // 🔎 check if already member
+      fluxNexusHandler.query(
+        "SELECT * FROM workspace_members WHERE workspace_id=? AND user_id=?",
+        [workspace_id, userId],
+        (err2, existing) => {
+          if (err2) {
+            console.log("CHECK MEMBER ERROR:", err2);
+            return res.status(500).json({ message: "DB error" });
+          }
+
+          if (existing.length > 0) {
+            return res.json({ message: "User already in workspace" });
+          }
+
+          // ✅ INSERT MEMBER
+          fluxNexusHandler.query(
+            `INSERT INTO workspace_members 
+            (workspace_id, user_id, role, joined_at) 
+            VALUES (?, ?, ?, NOW())`,
+            [workspace_id, userId, "member"],
+            (err3) => {
+              if (err3) {
+                console.log("INSERT ERROR:", err3);
+                return res.status(500).json({ message: "Insert failed" });
+              }
+
+              res.json({
+                success: true,
+                message: "User invited successfully"
+              });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+
+// =====================================================
+// KEEP THIS ALWAYS LAST LINE IN SERVER
+// =====================================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Nexus stability layer active on port ${PORT}`);
+  console.log(`Nexus stability layer active on port ${PORT}`);
 });

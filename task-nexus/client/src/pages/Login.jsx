@@ -18,7 +18,7 @@ function Login() {
 
         try {
             await login(email, password);
-            navigate('/');           // go dashboard
+            navigate('/app');           // go dashboard
         } catch (err) {
             console.log("LOGIN ERROR:", err);
             setError(err?.response?.data?.error || 'Login failed');

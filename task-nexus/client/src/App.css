@@ -32,6 +32,23 @@
     background-color: hsl(var(--bg));
 }
 
+/* ===== DARK MODE VARIABLES ===== */
+[data-theme="dark"] {
+    --bg: 222 47% 11%;
+    --bg-secondary: 217 33% 17%;
+    --card: 222 47% 14%;
+    --card-hover: 222 47% 18%;
+    --text: 210 40% 98%;
+    --text-muted: 215 20% 65%;
+    --border: 217 33% 25%;
+    --glass: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-hover: rgba(255, 255, 255, 0.05);
+
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text));
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -1133,4 +1150,6 @@ select {
     .page-header {
         flex-direction: column;
     }
+        
+    
 }
