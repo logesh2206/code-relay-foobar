@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BarChart3, CheckCircle2, Clock, AlertTriangle, FolderKanban, Building2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.API_URL || 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -10,13 +10,15 @@ export default function Dashboard() {
 
     useEffect(() => {
         const token = localStorage.getItem('nexus_token');
-        axios.get(`${API_BASE}/analytics/dashboard`, {
+
+        axios.get(`${API}/api/analytics/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => setStats(response.data))
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
+
 
     if (loading) {
         return (

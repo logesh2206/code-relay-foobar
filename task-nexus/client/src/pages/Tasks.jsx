@@ -1,13 +1,12 @@
+const API = import.meta.env.VITE_API_URL;
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, Trash2, ArrowLeft, Calendar, Flag, Check, Clock, Eye, ListTodo } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
-const STATUSES = ['todo', 'in_progress', 'review', 'done'];
-const statusLabels = { todo: 'To Do', in_progress: 'In Progress', review: 'Review', done: 'Done' };
-const statusIcons = { todo: ListTodo, in_progress: Clock, review: Eye, done: Check };
-const priorityColors = { low: '#94A3B8', medium: '#3B82F6', high: '#F59E0B', urgent: '#EF4444' };
+const API_BASE = import.meta.env.VITE_API_URL + "/api";
+
 
 export default function Tasks() {
     const { projectId } = useParams();

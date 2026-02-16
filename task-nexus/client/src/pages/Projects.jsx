@@ -1,9 +1,11 @@
+const API = import.meta.env.VITE_API_URL;
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FolderKanban, Plus, Trash2, ChevronRight, ArrowLeft } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL + "/api";
 
 export default function Projects() {
     const { workspaceId } = useParams();

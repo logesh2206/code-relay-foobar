@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+const API = import.meta.env.VITE_API_URL;
+
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Building2, Plus, Users, Trash2, ChevronRight, UserPlus } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL + "/api";
+
 
 export default function Workspaces() {
     const [workspaces, setWorkspaces] = useState([]);
