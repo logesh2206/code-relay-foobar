@@ -20,8 +20,8 @@ const TaskItem = ({ task, onDelete, onToggle }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
                         <Clock size={12} color="#666" />
                         <span style={{ fontSize: '0.75rem', color: '#666' }}>
-                            {new Date(task.created_at).toLocaleDateString()
-            </span>
+                            {new Date(task.created_at).toLocaleDateString()}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -46,3 +46,5 @@ const TaskItem = ({ task, onDelete, onToggle }) => {
         onDelete: PropTypes.func.isRequired,
         onToggle: PropTypes.func.isRequired
     };
+};
+export default TaskItem;

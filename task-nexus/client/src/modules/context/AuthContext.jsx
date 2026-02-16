@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
-                    setUser(response);
+                    setUser(response.data);
                 })
                 .catch(() => {
                     setUser(null);
@@ -28,12 +28,15 @@ export function AuthProvider({ children }) {
     }, [token]);
 
     const login = async (email, password) => {
-        const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-        localStorage.setItem('nexus_token', response.data.token);
-        setToken(response.data.token);
-        setUser(response.data.user);
-        return response.data;
+    const response = await axios.post(`${API_BASE}/auth/login`, { email, password });
+
+    localStorage.setItem('nexus_token', response.data.token);
+    setToken(response.data.token);
+    setUser(response.data.user);
+
+    return response.data;
     };
+
 
     const register = async (username, email, password) => {
         const response = await axios.post(`${API_BASE}/auth/register`, { username, email, password });
@@ -44,10 +47,14 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
+    localStorage.clear();   // remove everything
+    sessionStorage.clear();
+    setUser(null);
+    setToken(null);
+    window.location.href = "/login";   // force reload  
+    
     };
+
 
     return (
         <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>

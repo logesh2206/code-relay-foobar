@@ -12,14 +12,16 @@ function Login() {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        setError('');
+        e.preventDefault();          // stop page reload
+        setError('');                // clear old error
         setLoading(true);
 
         try {
             await login(email, password);
-            navigate('/');
+            navigate('/');           // go dashboard
         } catch (err) {
-            setError(err.data?.error || 'Login failed');
+            console.log("LOGIN ERROR:", err);
+            setError(err?.response?.data?.error || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -47,11 +49,10 @@ function Login() {
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                        <label>Email</label>
                         <div className="input-with-icon">
                             <Mail size={18} className="input-icon" />
                             <input
-                                id="email"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -62,11 +63,10 @@ function Login() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Password</label>
+                        <label>Password</label>
                         <div className="input-with-icon">
                             <Lock size={18} className="input-icon" />
                             <input
-                                id="password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -89,4 +89,4 @@ function Login() {
     );
 }
 
-export { Login };
+export default Login;
