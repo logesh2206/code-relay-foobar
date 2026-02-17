@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL + "/api";
 
 const AuthContext = createContext(null);
 
@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         if (token) {
-            axios.get('http://localhost:5000/api/auth/me', {
+            axios.get(`${API_BASE}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
                 .then(response => {
@@ -28,33 +28,32 @@ export function AuthProvider({ children }) {
     }, [token]);
 
     const login = async (email, password) => {
-    const response = await axios.post(`${API_BASE}/auth/login`, { email, password });
+        const response = await axios.post(`${API_BASE}/auth/login`, { email, password });
 
-    localStorage.setItem('nexus_token', response.data.token);
-    setToken(response.data.token);
-    setUser(response.data.user);
-
-    return response.data;
-    };
-
-
-    const register = async (username, email, password) => {
-        const response = await axios.post(`${API_BASE}/auth/register`, { username, email, password });
         localStorage.setItem('nexus_token', response.data.token);
         setToken(response.data.token);
         setUser(response.data.user);
+
+        return response.data;
+    };
+
+    const register = async (username, email, password) => {
+        const response = await axios.post(`${API_BASE}/auth/register`, { username, email, password });
+
+        localStorage.setItem('nexus_token', response.data.token);
+        setToken(response.data.token);
+        setUser(response.data.user);
+
         return response.data;
     };
 
     const logout = () => {
-    localStorage.clear();   // remove everything
-    sessionStorage.clear();
-    setUser(null);
-    setToken(null);
-    window.location.href = "/login";   // force reload  
-    
+        localStorage.clear();
+        sessionStorage.clear();
+        setUser(null);
+        setToken(null);
+        window.location.href = "/login";
     };
-
 
     return (
         <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
