@@ -9,10 +9,10 @@ const jwt = require("jsonwebtoken");
 const app = express();
 
 /* ============================
-🔥 PRODUCTION CORS FIX
+CORS
 ============================ */
 app.use(cors({
-  origin: "*", // allow all (safe for now)
+  origin: "*",
   methods: ["GET","POST","PUT","DELETE"],
   allowedHeaders: ["Content-Type","Authorization"]
 }));
@@ -20,27 +20,33 @@ app.use(cors({
 app.use(express.json());
 
 /* ============================
-DATABASE CONNECTION
+DATABASE CONNECTION (IMPORTANT)
 ============================ */
-const JWT_SECRET = "super-secret-key-123";
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-});
+const DATABASE_URL = process.env.DATABASE_URL;
 
-db.connect(err=>{
+if(!DATABASE_URL){
+  console.log("❌ DATABASE_URL NOT FOUND IN ENV");
+  process.exit(1);
+}
+
+const db = mysql.createConnection(DATABASE_URL);
+
+db.connect((err)=>{
   if(err){
-    console.error("❌ MySQL error:",err);
+    console.error("❌ MySQL connection failed:", err);
     return;
   }
-  console.log("✅ MySQL connected");
+  console.log("✅ MySQL CONNECTED SUCCESSFULLY");
 });
 
 /* ============================
-AUTH REGISTER
+JWT
+============================ */
+const JWT_SECRET = "super-secret-key-123";
+
+/* ============================
+REGISTER
 ============================ */
 app.post("/api/auth/register",(req,res)=>{
   const { username,email,password } = req.body;
@@ -55,12 +61,10 @@ app.post("/api/auth/register",(req,res)=>{
 
     const userId = results.insertId;
 
-    const wsQuery = `
-      INSERT INTO workspaces (name,description,owner_id)
-      VALUES (?,?,?)
-    `;
-
-    db.query(wsQuery,[`${username} Workspace`,"Default workspace",userId],
+    db.query(
+      `INSERT INTO workspaces (name,description,owner_id)
+       VALUES (?,?,?)`,
+      [`${username} Workspace`,"Default workspace",userId],
       (err2,wsResults)=>{
 
         if(wsResults){
@@ -79,10 +83,7 @@ app.post("/api/auth/register",(req,res)=>{
           );
         }
 
-        const token = jwt.sign(
-          { id:userId,username,email },
-          JWT_SECRET
-        );
+        const token = jwt.sign({ id:userId,username,email },JWT_SECRET);
 
         res.json({
           token,
@@ -125,7 +126,7 @@ app.post("/api/auth/login",(req,res)=>{
 });
 
 /* ============================
-GET CURRENT USER
+CURRENT USER
 ============================ */
 app.get("/api/auth/me",(req,res)=>{
   const authHeader = req.headers.authorization;
@@ -173,36 +174,6 @@ app.get("/api/workspaces",(req,res)=>{
 });
 
 /* ============================
-CREATE WORKSPACE
-============================ */
-app.post("/api/workspaces",(req,res)=>{
-  const { name,description } = req.body;
-
-  let userId = 1;
-  try{
-    const token = req.headers.authorization?.split(" ")[1];
-    if(token) userId = jwt.verify(token,JWT_SECRET).id;
-  }catch{}
-
-  db.query(
-    `INSERT INTO workspaces (name,description,owner_id)
-     VALUES (?,?,?)`,
-    [name,description,userId],
-    (err,results)=>{
-      if(err) return res.status(500).json({error:err.message});
-
-      db.query(
-        `INSERT INTO workspace_members (workspace_id,user_id,role)
-         VALUES (?,?,?)`,
-        [results.insertId,userId,"owner"]
-      );
-
-      res.json({ id:results.insertId,name,description,owner_id:userId });
-    }
-  );
-});
-
-/* ============================
 PROJECTS
 ============================ */
 app.get("/api/projects/workspace/:workspaceId",(req,res)=>{
@@ -234,6 +205,7 @@ app.post("/api/projects",(req,res)=>{
 SERVER START
 ============================ */
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT,()=>{
   console.log("🚀 SERVER RUNNING ON PORT",PORT);
 });
